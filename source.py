@@ -8,15 +8,15 @@ from selenium.webdriver import ActionChains
 from chromedriver_py import binary_path
 
 class Eitaa:
-    def __init__(self, support_chat_id, labeling, profile_path):
+    def __init__(self, support_chat_id, prefix, chrome_profile_path):
         # Initialize the WebDriver
         self.driver_path = binary_path
         self.options = Options()
-        self.options.add_argument(profile_path)
+        self.options.add_argument(chrome_profile_path)
         self.options.add_argument("--start-minimized")
         self.svc = webdriver.ChromeService(executable_path=self.driver_path)
         self.driver = webdriver.Chrome(service=self.svc, options=self.options)
-        self.contact_prefix = labeling
+        self.contact_prefix = prefix
         self.inti_chat_id = support_chat_id
         self.output_csv = []
         
@@ -74,26 +74,21 @@ class Eitaa:
         self.driver.refresh()
         time.sleep(1)
 
-    def execute(self, message):
-        index= 0
-        while True:
-            try:
-                self.get_item(item_index=index)
-                self.get_contact()
-                index += 1
-            except IndexError:
-                break
+    def execute(self):
+        for i in range(len(self.csv_file)):
+            self.get_item(item_index=i)
+            self.get_contact()
 
     def close(self):
         self.driver.quit()
 
 if __name__ == "__main__":
-    application = Eitaa(support_chat_id="333000", labeling= "اطلاع رسانی بیمه", profile_path= "user-data-dir=C:\\Users\\amira\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1")
+    application = Eitaa(support_chat_id="333000", prefix= "اطلاع رسانی بیمه", chrome_profile_path= "user-data-dir=C:\\Users\\amira\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1")
 
     application.read_csv('data_csv.csv')
     application.get_url(f"https://web.eitaa.com/#{application.inti_chat_id}")
 
-    application.execute(message= "")
+    application.execute()
 
     input("Press Enter to close...")
     # application.close()
