@@ -172,9 +172,10 @@ class Eitaa:
     
     def report_logs(self, exp):
         parse_url = "https://tapi.bale.ai/406394701:1qgLsOLSAqoswcdmLvfTOPpQA6glRlrfEvM5il9O/sendMessage"
-        return requests.post(parse_url, data= {'chat_id':f'{self.support_chat_id}', 'text': f'{exp}'})
+        return requests.post(parse_url, json= {'chat_id':f'{self.support_chat_id}', 'text': f'{exp}'})
 
     def execution(self):
+        count_break_point = [0,1]
         for i in range(len(self.csv_data)):
             try:
                 self.get_item(item_index=i)
@@ -199,12 +200,21 @@ class Eitaa:
 
                 self.count_error = 0
                 self.update_csv(row= i)
+                
+                count_break_point[0] = i
+                if count_break_point[0] >= 1000:
+                    try:
+                        self.report_logs(f"done for {count_break_point[1]}th {count_break_point[0]} group of people!")
+                    except:
+                        pass
+                    count_break_point[0] = 0
+                    count_break_point[1] += 1
 
             except NoSuchElementException as exp:
                 self.count_error += 1
                 self.update_csv(row= i)
                 if self.count_error >= 10:
-                    self.report_logs(f"running process stopped during gotten several {exp}")
+                    self.report_logs(f"running process stopped during gotten several {exp}!")
                     break
                 
                 self.driver.refresh()
@@ -220,7 +230,7 @@ class Eitaa:
                 self.update_csv(row= i)
             
                 if self.count_error >= 5:
-                    self.report_logs(f"running process stopped during gotten several {exp}")
+                    self.report_logs(f"running process stopped during gotten several {exp}!")
                     break
 
                 time.sleep(600)
@@ -238,7 +248,7 @@ class Eitaa:
         self.driver.quit()
 
 if __name__ == "__main__":
-    application = Eitaa(csv_path="data_csv.csv", init_chat_id="333000", prefix= "اطلاع رسانی بیمه", chrome_profile_path= "user-data-dir=C:\\Users\\amira\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1", dev_chat_id= "406394701", message="همکار محترم دانشگاه علوم پزشکی تبریز %s %s؛\n به استحضار می رساند آخرین مهلت ثبت نام بیمه درمان تکمیلی و عمر و حوادث کارکنان دانشگاه تا پایان وقت اداری مورخ 1403/11/15 می باشد. جهت ثبت نام به رابطین رفاهی مرکز خود مراجعه فرمایید؛ همچنین جهت کسب اطلاعات بیشتر می توانید از نشانی www.bimeh197.ir بازدید فرمایید.")
+    application = Eitaa(csv_path="data_csv.csv", init_chat_id="333000", prefix= "اطلاع رسانی بیمه", chrome_profile_path= "user-data-dir=C:\\Users\\amira\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1", dev_chat_id= "431600925", message="همکار محترم دانشگاه علوم پزشکی تبریز %s %s؛\n به استحضار می رساند آخرین مهلت ثبت نام بیمه درمان تکمیلی و عمر و حوادث کارکنان دانشگاه تا پایان وقت اداری مورخ 1403/11/15 می باشد. جهت ثبت نام به رابطین رفاهی مرکز خود مراجعه فرمایید؛ همچنین جهت کسب اطلاعات بیشتر می توانید از نشانی www.bimeh197.ir بازدید فرمایید.")
 
     application.read_csv()
     application.get_url(f"https://web.eitaa.com/#{application.inti_chat_id}")
