@@ -1,6 +1,6 @@
-# stable version for Eitta Web 4.6.10
+# stable version for Eitaa Web 4.6.10
 
-# import required libraries
+# Import required libraries
 import time
 import re
 import csv
@@ -12,10 +12,22 @@ from selenium.webdriver import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 from chromedriver_py import binary_path
 
-# create class of program
+# Define global configuration variables
+IMPLICIT_WAIT_TIME = 0.25
+SHORT_WAIT_TIME = 0.0625
+REFRESH_WAIT_TIME = 0.5
+TIMEOUT_WAIT_TIME = 600
+ERROR_THRESHOLD = 10
+TIMEOUT_THRESHOLD = 5
+REPORT_FREQUENCY = 1000
+MAIN_EITAA_URL = "https://web.eitaa.com/"
+INDEX_CONTACT_LABEL = "کد"
+
+
+# Create a class for the Eitaa automation
 class Eitaa:
     def __init__(self, csv_path, init_chat_id, prefix, chrome_profile_path, dev_chat_id, message):
-        # initialize the webdriver and chrome profile and other variables
+        # Initialize the webdriver, Chrome profile, and other variables
         self.driver_path = binary_path
         self.options = Options()
         self.options.add_argument(chrome_profile_path)
@@ -30,207 +42,207 @@ class Eitaa:
         self.count_error = 0
         self.count_timeout = 0
 
-    # to open given url
+    # Opens the given URL in the browser
     def get_url(self, url):
         self.driver.get(url)
-        time.sleep(0.5)
+        time.sleep(REFRESH_WAIT_TIME)
         self.driver.refresh()
-        time.sleep(0.5)
+        time.sleep(REFRESH_WAIT_TIME)
 
-    # to read data the csv file of program work with it (input and output are same file) as csv_data array
+    # Reads data from the CSV file. Input and output are the same file, stored as csv_data array.
     def read_csv(self):
         with open(self.file_dir, mode='r', newline='', encoding='utf-8-sig') as f:
             self.csv_data = list(csv.reader(f))
 
-    # to get a record of table and assign it to item
+    # Gets a record from the table and assigns it to 'item'
     def get_item(self, item_index):
         self.item= self.csv_data[item_index]
     
-    # some actions to save item in contact
+    # Actions to save the item as a contact
     def save_contact(self):
-        # press the pencel icon
+        # Click the pencil icon
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[1]/div/div/div[2]/div[3]/div[1]")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
 
-        # press the new message icon
+        # Click the new message icon
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[1]/div/div/div[2]/div[3]/div[3]/div[3]")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
         
-        # press the + icon
+        # Click the + icon
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[1]/div/div[2]/div[2]/button/div")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
 
-        # fill name and prefix and phone number of item as creating contact
-        self.driver.execute_script(f"arguments[0].textContent = 'کد {self.item[0]}';", self.driver.find_element(By.XPATH,"/html/body/div[5]/div/div[2]/div[1]/div[1]"))
+        # Fill in the name, prefix, and phone number of the item to create a new contact
+        self.driver.execute_script(f"arguments[0].textContent = '{INDEX_CONTACT_LABLE} {self.item[0]}';", self.driver.find_element(By.XPATH,"/html/body/div[5]/div/div[2]/div[1]/div[1]"))
         self.driver.execute_script(f"arguments[0].textContent = '{self.contact_prefix}';", self.driver.find_element(By.XPATH,"/html/body/div[5]/div/div[2]/div[2]/div[1]"))
         clickable = self.driver.find_element(By.XPATH,"/html/body/div[5]/div/div[3]/div[1]")
         clickable.click()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
 
-        # fill phone number digit by digit for sensitive inputs like that
+        # Fill in the phone number digit by digit for sensitive inputs
         for digit in self.item[3]:
             clickable.send_keys(digit)
-            time.sleep(0.0625)
+            time.sleep(SHORT_WAIT_TIME)
 
-        # press the add to contact button
+        # Click the add to contact button
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div[1]/button/div")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
 
-        # refresh twice to update contact list
+        # Refresh the page twice to update the contact list
         self.driver.refresh()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
         self.driver.refresh()
-        time.sleep(0.5)
+        time.sleep(REFRESH_WAIT_TIME)
 
-    # find and bring chat-screen of added contact if founded returns 1 else returns 0
+    # Finds and returns the chat screen of the added contact. Returns 1 if found, 0 otherwise.
     def get_contact(self, content):
-        # press the search-bar
+        # Click the search bar
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[1]/div/div/div[1]/div[2]")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
 
-        # insert the contact info to search added contact
+        # Insert the contact info to search
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[1]/div/div/div[1]/div[2]/input")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
         clickable.send_keys(content)
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
 
         try:
-            # press the first result from search result as founded contact to froward chat-screen if exists
+            # Click the first search result (the contact) to forward to their chat screen
             clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[1]/div/div/div[2]/div[2]/div[3]/div/div/div[1]/div/div/ul/li[1]")
             ActionChains(self.driver)\
                 .click(clickable)\
                 .perform()
-            time.sleep(0.25)
+            time.sleep(IMPLICIT_WAIT_TIME)
 
-            # checks if search result is empty or not
+            # Checks if search result is empty or not
             if self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[2]/div/div/div[2]/div[1]/div/div/div[1]/div/span").text == content:
                 return 1
             else:
                 return 0
-        # try and exception "NoSuchElementException" error to handel missed element caused by empty result searching
+        # Handles "NoSuchElementException" if the search result is empty
         except NoSuchElementException:
             return 0
     
-    # get and adds the chat-id current contact by fetching it from chat-page url
+    # Gets the chat ID of the current contact by fetching it from the chat page URL
     def get_chat_id(self):
         self.item[8] = re.search(r"#\d+",self.driver.current_url).group()
 
-    # to send a given massage on current chat, checks if succeed returns 1 else returns 0
+    # Sends a given message in the current chat. Returns 1 if successful, 0 otherwise.
     def send_message(self, message):
         try:
-            # press the chat-bar to make text-cursor appear
+            # Click the chat bar to make the text cursor appear
             clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[2]/div/div/div[4]/div/div[1]/div[7]/div[1]")
             ActionChains(self.driver)\
                 .click(clickable)\
                 .perform()
-            time.sleep(0.25)
+            time.sleep(IMPLICIT_WAIT_TIME)
 
-            # insert the massage to chat-bar
+            # Insert the message into the chat bar
             self.driver.execute_script(f"arguments[0].innerText = arguments[1];", self.driver.find_element(By.XPATH,"/html/body/div[2]/div[1]/div[2]/div/div/div[4]/div/div[1]/div[7]/div[1]/div[1]"), message)
-            time.sleep(0.0625)
+            time.sleep(SHORT_WAIT_TIME)
             
-            # press the send icon
+            # Click the send icon
             clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[2]/div/div/div[4]/div/div[4]/button/div")
             ActionChains(self.driver)\
                 .click(clickable)\
                 .perform()
-            time.sleep(0.25)
+            time.sleep(IMPLICIT_WAIT_TIME)
             
-            # checks massage sent and returns 1 if the chat-bar was empty else returns 0
+            # Checks if the message was sent and returns 1 if the chat bar is empty, 0 otherwise.
             if self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[2]/div/div/div[4]/div/div[1]/div[7]/div[1]/div[1]").text == "":
                 return 1
             else:
                 return 0
-        # try and exception "NoSuchElementException" error to handel missed elements
+        # Handles "NoSuchElementException" if elements are missing
         except NoSuchElementException:
             return 0
     
-    # to update current item information on csv file used for live updating item by item
+    # Updates the current item information in the CSV file. Used for live updating.
     def update_csv(self, row):
         self.csv_data[row] = self.item
         with open(self.file_dir, mode='w', newline='', encoding='utf-8-sig') as f:
             writer = csv.writer(f)
             writer.writerows(self.csv_data)
 
-    # to drop current contact prevents fulling contact list and search contact problem for next items
+    # Removes the current contact to avoid filling the contact list and causing search problems.
     def remove_contact(self):
         
-        # press contact name to open current contact profile
+        # Click on the contact name to open the contact profile
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[2]/div/div/div[2]/div[1]/div")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
         
-        # press more option icon
+        # Click the more options icon
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[3]/div/div/div[1]/div/div[1]/button")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
 
-        # press drop contact
+        # Click drop contact
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[2]/div[1]/div[3]/div/div[2]/div[2]/div/div[2]/div/div")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
         
-        # press to agree to drop current contact
+        # Click to confirm dropping the contact
         clickable = self.driver.find_element(By.XPATH, "/html/body/div[5]/div/div[2]/button[1]")
         ActionChains(self.driver)\
             .click(clickable)\
             .perform()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
 
-        # refresh twice to update contact list
+        # Refresh the page twice to update the contact list
         self.driver.refresh()
-        time.sleep(0.25)
+        time.sleep(IMPLICIT_WAIT_TIME)
         self.driver.refresh()
-        time.sleep(0.5)
+        time.sleep(REFRESH_WAIT_TIME)
     
-    # to report bugs or logs of running process using a third-party messenger
+    # Reports bugs or logs of the running process using a third-party messenger.
     def report_logs(self, exp):
         parse_url = "https://tapi.bale.ai/406394701:1qgLsOLSAqoswcdmLvfTOPpQA6glRlrfEvM5il9O/sendMessage"
         return requests.post(parse_url, json= {'chat_id':f'{self.support_chat_id}', 'text': f'{exp}'})
 
-    # main function executed to auto send patterned message
+    # Main function to auto-send patterned messages
     def execution(self):
-        # count checked record for reporting
+        # Count checked records for reporting
         count_break_point = [0,1]
-        # iteration on each records as row index i
+        # Iterate over each record (row) in the CSV data
         for i in range(len(self.csv_data)):
             try:
                 self.get_item(item_index=i)
-                # checks if current item as a contact has "Eitaa" acount or not if has not account, the remained process will skipped for this record
+                # Check if the current item (contact) has an Eitaa account. If not, skip to the next record.
                 if self.item[6]:
                     self.save_contact()
                 else:
                     continue
 
-                # gets chat-screen of current item as a contact, if could not gets which mean the contact has not "Eitaa" acount so changes the related column amount to 0 and updates the record with,the remained process will skipped for this record
-                if not self.get_contact(f"کد {self.item[0]} {self.contact_prefix}"):
+                # Get the chat screen of the current contact. If not found (meaning the contact does not have an Eitaa account), update the related column and skip to the next record.
+                if not self.get_contact(f"{INDEX_CONTACT_LABLE} {self.item[0]} {self.contact_prefix}"):
                     self.item[6]= 0
                     self.update_csv(row= i)
                     continue
-                # checks if the massage sent before for current item as a contact, the remained process will skipped for this record else sends the message to current user and changes the related column amount to 1, if was not successful the "NoMessageSendError" will be raised
+                # Checks if a message has already been sent to the current contact. If so, skip this record. Otherwise, sends the message, updates the corresponding column, and raises "NoMessageSendError" if unsuccessful.
                 if not self.item[7]:
                     self.remove_contact()
                     continue
@@ -243,13 +255,13 @@ class Eitaa:
                 self.get_chat_id()
                 self.remove_contact()
 
-                # reset the error counter if the process for this record was successfully done then updates file
+                # Reset the error counter if the process for this record was successful, then update the CSV
                 self.count_error = 0
                 self.update_csv(row= i)
                 
-                # this gonna report every 1000 record was processed
+                # Reports progress every 1000 records
                 count_break_point[0] = i
-                if count_break_point[0] >= 1000:
+                if count_break_point[0] >= REPORT_FREQUENCY:
                     try:
                         self.report_logs(f"done for {count_break_point[1]}th, {count_break_point[0]} group of people!")
                     except:
@@ -257,38 +269,38 @@ class Eitaa:
                     count_break_point[0] = 0
                     count_break_point[1] += 1
 
-            # try and exception "NoSuchElementException" to handel missed element, the program will be start again recursively, if this error happens for several times the program will be stopped and reported
+            # Handles "NoSuchElementException" for missing elements. The program will restart recursively. If this error happens several times, the program will stop and report the error.
             except NoSuchElementException as exp:
                 self.count_error += 1
-                if self.count_error >= 10:
+                if self.count_error >= ERROR_THRESHOLD:
                     self.report_logs(f"running process stopped during gotten several {exp} error!")
                     break
                 
                 self.driver.refresh()
-                time.sleep(0.25)
+                time.sleep(IMPLICIT_WAIT_TIME)
                 self.driver.refresh()
-                time.sleep(0.5)
+                time.sleep(REFRESH_WAIT_TIME)
 
                 self.read_csv()
-                self.get_url(f"https://web.eitaa.com/#{application.inti_chat_id}")
+                self.get_url(f"{MAIN_EITAA_URL}#{application.inti_chat_id}")
                 self.execution()
             
-            # try and exception "TimeoutError" to handel poor or lose connection, the program will be interrupt for minutes, if this error happens for several times the program will be stopped and reported
+            # Handles "TimeoutError" for poor connection. The program will pause. If this error happens several times, the program will stop and report the error.
             except TimeoutError as exp:
                 self.count_timeout += 1
                 self.update_csv(row= i)
             
-                if self.count_error >= 5:
+                if self.count_error >= TIMEOUT_THRESHOLD:
                     self.report_logs(f"running process stopped during gotten several {exp} error!")
                     break
 
-                time.sleep(600)
+                time.sleep(TIMEOUT_WAIT_TIME)
 
                 self.read_csv()
-                self.get_url(f"https://web.eitaa.com/#{application.inti_chat_id}")
+                self.get_url(f"{MAIN_EITAA_URL}#{application.inti_chat_id}")
                 self.execution()
             
-            # try and exception "NoMessageSendError" to handel missed sending, this will be reported and skipped for current record
+            # Handles "NoMessageSendError" for missed sending. This will be reported and the record will be skipped.
             except TypeError as exp:
                 try:
                     self.report_logs(f"{exp} for record {self.item[0]}")
@@ -296,17 +308,24 @@ class Eitaa:
                     pass
                 continue
     
-    # to close driver
+    # Closes the webdriver
     def close(self):
         self.driver.quit()
 
-# initialize program
+# Initialize the program
 if __name__ == "__main__":
-    # use program call the parameters are file_path, initialize chat-id to start, prefix for make contact saving regular, a chrome profile path to save login credentials, report user chat_id on third-party platform, patterned message
-    application = Eitaa(csv_path="data_csv.csv", init_chat_id="333000", prefix= "اطلاع رسانی بیمه", chrome_profile_path= "user-data-dir=C:\\Users\\amira\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1", dev_chat_id= "431600925", message="همکار محترم دانشگاه علوم پزشکی تبریز %s %s؛\n به استحضار می رساند آخرین مهلت ثبت نام بیمه درمان تکمیلی و عمر و حوادث کارکنان دانشگاه تا پایان وقت اداری مورخ 1403/11/15 می باشد. جهت ثبت نام به رابطین رفاهی مرکز خود مراجعه فرمایید؛ همچنین جهت کسب اطلاعات بیشتر می توانید از نشانی www.bimeh197.ir بازدید فرمایید.")
+    # Program call parameters are: file_path, initial chat ID, prefix for saving contacts, Chrome profile path, reporting user chat ID, and patterned message.
+    application = Eitaa(
+        csv_path="data_csv.csv",
+        init_chat_id="333000",
+        prefix= "اطلاع رسانی بیمه",
+        chrome_profile_path= "user-data-dir=C:\\Users\\amira\\AppData\\Local\\Google\\Chrome\\User Data\\Profile 1",
+        dev_chat_id= "431600925",
+        message="همکار محترم دانشگاه علوم پزشکی تبریز %s %s؛\n به استحضار می رساند آخرین مهلت ثبت نام بیمه درمان تکمیلی و عمر و حوادث کارکنان دانشگاه تا پایان وقت اداری مورخ 1403/11/15 می باشد. جهت ثبت نام به رابطین رفاهی مرکز خود مراجعه فرمایید؛ همچنین جهت کسب اطلاعات بیشتر می توانید از نشانی www.bimeh197.ir بازدید فرمایید."
+    )
 
     application.read_csv()
-    application.get_url(f"https://web.eitaa.com/#{application.inti_chat_id}")
+    application.get_url(f"{MAIN_EITAA_URL}#{application.inti_chat_id}")
 
     application.execution()
     
