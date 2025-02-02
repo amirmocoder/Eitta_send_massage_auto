@@ -293,7 +293,7 @@ class Eitaa:
             try:
                 self.get_item(item_index=i)
                 # Check if the current item (contact) has an Eitaa account. If not, skip to the next record.
-                if self.item[6] and not self.item[7]:
+                if bool(self.item[6]) and not bool(self.item[7]):
                     self.save_contact()
                 else:
                     continue
