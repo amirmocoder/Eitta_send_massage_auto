@@ -82,7 +82,7 @@ class Eitaa:
         time.sleep(IMPLICIT_WAIT_TIME)
 
         # Fill in the name, prefix, and phone number of the item to create a new contact
-        self.driver.execute_script(f"arguments[0].textContent = '{INDEX_CONTACT_LABLE} {self.item[0]}';", self.driver.find_element(By.XPATH,"/html/body/div[5]/div/div[2]/div[1]/div[1]"))
+        self.driver.execute_script(f"arguments[0].textContent = '{INDEX_CONTACT_LABEL} {self.item[0]}';", self.driver.find_element(By.XPATH,"/html/body/div[5]/div/div[2]/div[1]/div[1]"))
         self.driver.execute_script(f"arguments[0].textContent = '{self.contact_prefix}';", self.driver.find_element(By.XPATH,"/html/body/div[5]/div/div[2]/div[2]/div[1]"))
         clickable = self.driver.find_element(By.XPATH,"/html/body/div[5]/div/div[3]/div[1]")
         clickable.click()
@@ -238,7 +238,7 @@ class Eitaa:
                     continue
 
                 # Get the chat screen of the current contact. If not found (meaning the contact does not have an Eitaa account), update the related column and skip to the next record.
-                if not self.get_contact(f"{INDEX_CONTACT_LABLE} {self.item[0]} {self.contact_prefix}"):
+                if not self.get_contact(f"{INDEX_CONTACT_LABEL} {self.item[0]} {self.contact_prefix}"):
                     self.item[6]= 0
                     self.update_csv(row= i)
                     continue
