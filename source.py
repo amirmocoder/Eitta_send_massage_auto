@@ -306,16 +306,12 @@ class Eitaa:
                     self.update_csv(row=i)
                     continue
                 # Checks if a message has already been sent to the current contact. If so, skip this record. Otherwise, sends the message, updates the corresponding column, and raises "NoMessageSendError" if unsuccessful.
-                if not self.item[7]:
-                    self.remove_contact()
-                    continue
+                if self.send_message(
+                    self.message_pattern % (self.item[1], self.item[2])
+                ):
+                    self.item[7] = 1
                 else:
-                    if self.send_message(
-                        self.message_pattern % (self.item[1], self.item[2])
-                    ):
-                        self.item[7] = 1
-                    else:
-                        raise TypeError("NoMessageSendError")
+                    raise TypeError("NoMessageSendError")
 
                 self.get_chat_id()
                 self.remove_contact()
