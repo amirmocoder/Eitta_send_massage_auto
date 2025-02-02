@@ -289,7 +289,7 @@ class Eitaa:
                 self.execution()
             
             # try and exception "NoMessageSendError" to handel missed sending, this will be reported and skipped for current record
-            except "NoMessageSendError" as exp:
+            except TypeError as exp:
                 try:
                     self.report_logs(f"{exp} for record {self.item[0]}")
                 except:
