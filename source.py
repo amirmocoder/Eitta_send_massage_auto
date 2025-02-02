@@ -314,11 +314,12 @@ class Eitaa:
                     raise TypeError("NoMessageSendError")
 
                 self.get_chat_id()
+                self.update_csv(row=i)
+                
                 self.remove_contact()
 
                 # Reset the error counter if the process for this record was successful, then update the CSV
                 self.count_error = 0
-                self.update_csv(row=i)
 
                 # Reports progress every REPORT_FREQUENCY records
                 count_break_point[0] = i
