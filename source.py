@@ -290,6 +290,18 @@ class Eitaa:
         count_break_point = [0, 1]
         # Iterate over each record (row) in the CSV data
         for i in range(len(self.csv_data)):
+            # Reports progress every REPORT_FREQUENCY records
+            count_break_point[0] = i
+            if count_break_point[0] >= REPORT_FREQUENCY:
+                try:
+                    self.report_logs(
+                        f"done for {count_break_point[1]}th, {count_break_point[0]} group of people!"
+                    )
+                except:
+                    pass
+                count_break_point[0] = 0
+                count_break_point[1] += 1
+                
             try:
                 self.get_item(item_index=i)
                 # Check if the current item (contact) has an Eitaa account. If not, skip to the next record.
@@ -320,18 +332,6 @@ class Eitaa:
 
                 # Reset the error counter if the process for this record was successful, then update the CSV
                 self.count_error = 0
-
-                # Reports progress every REPORT_FREQUENCY records
-                count_break_point[0] = i
-                if count_break_point[0] >= REPORT_FREQUENCY:
-                    try:
-                        self.report_logs(
-                            f"done for {count_break_point[1]}th, {count_break_point[0]} group of people!"
-                        )
-                    except:
-                        pass
-                    count_break_point[0] = 0
-                    count_break_point[1] += 1
 
             # Handles "NoSuchElementException" for missing elements. The program will restart recursively. If this error happens several times, the program will stop and report the error.
             except NoSuchElementException as exp:
