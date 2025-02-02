@@ -177,16 +177,16 @@ class Eitaa:
                 ).text
                 == content
             ):
-                return 1
+                return True
             else:
-                return 0
+                return False
         # Handles "NoSuchElementException" if the search result is empty
         except NoSuchElementException:
-            return 0
+            return False
 
     # Gets the chat ID of the current contact by fetching it from the chat page URL
     def get_chat_id(self):
-        self.item[8] = re.search(r"#\w+", self.driver.current_url).group()
+        self.item[8] = re.search(r"#\d+|#\S+", self.driver.current_url).group()
 
     # Sends a given message in the current chat. Returns 1 if successful, 0 otherwise.
     def send_message(self, message):
@@ -226,12 +226,12 @@ class Eitaa:
                 ).text
                 == ""
             ):
-                return 1
+                return True
             else:
-                return 0
+                return False
         # Handles "NoSuchElementException" if elements are missing
         except NoSuchElementException:
-            return 0
+            return False
 
     # Updates the current item information in the CSV file. Used for live updating.
     def update_csv(self, row):
@@ -293,7 +293,7 @@ class Eitaa:
             try:
                 self.get_item(item_index=i)
                 # Check if the current item (contact) has an Eitaa account. If not, skip to the next record.
-                if bool(self.item[6]) and not bool(self.item[7]):
+                if bool(int(self.item[6])) and not bool(int(self.item[7])):
                     self.save_contact()
                 else:
                     continue
