@@ -397,5 +397,11 @@ if __name__ == "__main__":
     application.get_url(f"{MAIN_EITAA_URL}#{application.inti_chat_id}")
 
     application.execution()
+    try:
+        application.report_logs(
+            f"done for all records!"
+        )
+    except:
+        pass
 
     application.close()
